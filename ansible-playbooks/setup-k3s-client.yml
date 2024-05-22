@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: nvidia_container_toolkit_install
+    - role: nvidia_cuda_toolkit_install

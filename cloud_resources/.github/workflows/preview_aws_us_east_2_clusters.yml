@@ -1,0 +1,53 @@
+name: Create AWS us-east-2 clusters
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "clusters/us-east-2"
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+  checkout_code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "stable"
+
+  setup_creds_and_modules:
+    runs-on: ubuntu-latest
+    needs: checkout_code
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+      - run: go mod download
+        working-directory: cloud_resources/aws
+
+  preview:
+    runs-on: ubuntu-latest
+    needs: setup_creds_and_modules
+    steps:
+      - uses: pulumi/actions@v3
+        with:
+          command: preview
+          stack-name: ${{ matrix.stack }}
+          work-dir: cloud_resources/aws
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+    # Add stacks associated with this region here
+    strategy:
+      matrix:
+        stack: ["dev"]

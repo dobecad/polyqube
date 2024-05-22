@@ -1,0 +1,11 @@
+regions:
+    us-east-2:
+        clusters:
+            p6kyegpoo8ke:
+                workercount: 3
+                controlplanecount: 3
+                templateid: new-template-id
+            uudkp890mttx:
+                workercount: 2
+                controlplanecount: 3
+                templateid: new-template-id

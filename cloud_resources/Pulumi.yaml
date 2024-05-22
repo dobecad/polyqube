@@ -1,0 +1,4 @@
+name: polyqube
+runtime: go
+description: Program for deploying AWS, Azure, and GCP hybrid K3S clusters
+config:

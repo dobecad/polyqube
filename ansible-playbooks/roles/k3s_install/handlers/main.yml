@@ -1,0 +1,7 @@
+---
+- name: Reload sysctl
+  command: sysctl -p /etc/sysctl.d/90-kubelet.conf
+  async: 30
+  poll: 0
+  become: true
+  ignore_errors: true

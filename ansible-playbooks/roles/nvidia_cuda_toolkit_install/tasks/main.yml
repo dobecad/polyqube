@@ -1,0 +1,31 @@
+---
+- name: Download cuda-wsl-ubuntu.pin
+  become: true
+  ansible.builtin.get_url:
+    url: "https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin"
+    dest: "/etc/apt/preferences.d/cuda-repository-pin-600"
+
+- name: Download cuda-repo-wsl-ubuntu package
+  become: true
+  ansible.builtin.get_url:
+    url: "https://developer.download.nvidia.com/compute/cuda/12.3.2/local_installers/cuda-repo-wsl-ubuntu-12-3-local_12.3.2-1_amd64.deb"
+    dest: "/tmp/cuda-repo-wsl-ubuntu-12-3-local_12.3.2-1_amd64.deb"
+
+- name: Install cuda-repo-wsl-ubuntu package
+  become: true
+  ansible.builtin.shell: "dpkg -i /tmp/cuda-repo-wsl-ubuntu-12-3-local_12.3.2-1_amd64.deb"
+
+- name: Copy cuda-*-keyring.gpg to /usr/share/keyrings/
+  become: true
+  ansible.builtin.shell: "cp /var/cuda-repo-wsl-ubuntu-12-3-local/cuda-*-keyring.gpg /usr/share/keyrings/"
+
+- name: Update APT package cache
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install cuda-toolkit-12-3
+  become: true
+  ansible.builtin.apt:
+    name: cuda-toolkit-12-3
+    state: present

@@ -1,0 +1,9 @@
+---
+- name: Update packages
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Upgrade all packages
+  ansible.builtin.apt:
+    upgrade: yes
+    autoremove: yes

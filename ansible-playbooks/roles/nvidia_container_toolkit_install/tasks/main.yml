@@ -1,0 +1,50 @@
+---
+- name: Check OS flavor
+  command: cat /etc/os-release
+  register: response
+
+- name: Extract base OS flavor
+  set_fact:
+    id_like: '{{ response.stdout | regex_findall(''ID_LIKE="(.*)"'', multiline=True) | first }}'
+
+- block:
+    - name: Add NVIDIA container toolkit GPG key
+      become: true
+      ansible.builtin.shell: "curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg"
+
+    - name: Add NVIDIA container toolkit APT repository
+      become: true
+      ansible.builtin.shell: "curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | tee /etc/apt/sources.list.d/nvidia-container-toolkit.list"
+
+    - name: Update APT package cache
+      become: true
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install NVIDIA container toolkit
+      become: true
+      ansible.builtin.apt:
+        name: nvidia-container-toolkit
+        state: present
+
+    - name: Configure NVIDIA container toolkit for Docker runtime
+      become: true
+      ansible.builtin.command: "nvidia-ctk runtime configure --runtime=docker --set-as-default"
+
+    - name: Configure NVIDIA container toolkit for Containerd runtime
+      become: true
+      ansible.builtin.command: "nvidia-ctk runtime configure --runtime=containerd --set-as-default"
+
+    - name: Restart Docker daemon
+      become: true
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
+
+    - name: Restart Containerd daemon
+      become: true
+      ansible.builtin.systemd:
+        name: containerd
+        state: restarted
+
+  when: ("'ubuntu' in id_like | lower or 'debian' in id_like | lower")

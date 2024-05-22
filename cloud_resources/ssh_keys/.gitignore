@@ -1,0 +1,5 @@
+# Do not push any of the cluster access SSH keys to git
+*
+
+# Keep the .gitignore
+!.gitignore
